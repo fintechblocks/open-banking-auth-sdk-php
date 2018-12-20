@@ -134,4 +134,4 @@ $newTokens = $example->refreshToken($refreshToken);
 
 ## How to run the example ##
 
-You only need a Apache and php. 
+You only need an Apache and PHP enviroment. 
