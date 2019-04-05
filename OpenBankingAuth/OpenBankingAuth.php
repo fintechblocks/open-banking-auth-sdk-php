@@ -25,11 +25,11 @@
                 "grant_type" => "",
                 "private_key" => "",
                 "access_token" => "",
-                "account_request_id"=>"",
+                "account_access_consent_id"=>"",
                 "client_id" => "",
                 "code" => "",
                 "base_url" => "",
-                "oidc_base_url" => "",
+                "api_base_url" => "",
                 "x-fapi-customer-ip-address" => "",
                 "key_id" => ""
             ], $config);
@@ -45,8 +45,8 @@
                 "aud" => $this->config["tokenEndpoint"],
                 "exp" => time()+60000,
             ];
-            $JWT = new createJWT($assertionPayload, $this->config["private_key"]);
-            return $JWT->getJWT();
+            $JWT = new createJWT();
+            return $JWT->getJWT($assertionPayload, $this->config["private_key"]);
         }
 
         /**

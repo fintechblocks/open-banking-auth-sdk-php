@@ -10,17 +10,17 @@ class Functions {
     }
     
     /*************************************************************** ACCOUNT FUNCTIONS *****************************************************************/
-    public function createAccountRequest($body, $access_token, $header){
+    public function createAccountAccessConsent($body, $access_token, $header){
         $header = array_merge([
             "Authorization: Bearer ".$access_token
         ], $header);
         $connect =  new Connect([
-            "url" => $this->config["base_url"]."/account-requests",
+            "url" => $this->config["base_url"]."/account-access-consents",
             "header" => $header,
             "post" => json_encode($body)
         ]);
         $response = json_decode($connect->getResponse());
-        return $response->Data->AccountRequestId;
+        return $response->Data->ConsentId;
     }
 
     public function getAccounts($userAccessToken){
@@ -137,17 +137,17 @@ class Functions {
             "Authorization: Bearer ".$access_token
         ], $header);
         $connect =  new Connect([
-            "url" => $this->config["base_url"]."/payments",
+            "url" => $this->config["base_url"]."/domestic-payment-consents",
             "header" => $header,
             "post" => json_encode($body)
         ]);
         $response = json_decode($connect->getResponse());
-        return $response->Data->PaymentId;
+        return $response->Data->ConsentId;
     }
 
     public function getPaymentById($userAccessToken, $paymentId){
         $connect =  new Connect([
-            "url" => $this->config["base_url"]."/payments/".$paymentId,
+            "url" => $this->config["base_url"]."/domestic-payment-consents/".$paymentId,
             "header" => ["Authorization: Bearer ".$userAccessToken,"Content-Type: application/json","x-fapi-customer-ip-address: 127.0.0.1:8080"]
         ]);
         $response = json_decode($connect->getResponse());

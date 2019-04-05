@@ -8,13 +8,13 @@
         header("location:./index.php");
     }
     //Example "mode" parameters -- accounts
-    $modeArray["accounts"]["client_id"] = "";
-    $modeArray["accounts"]["base_url"] = "";
+    $modeArray["accounts"]["client_id"] = "<exampleAppclication>@account-info-1.0";
+    $modeArray["accounts"]["base_url"] = "<exampleOpenBankingApiUrl>/account-info-1.0/open-banking/v3.1/aisp";
     $modeArray["accounts"]["scope"] = "accounts";
 
     //Example "mode" parameters -- payments
-    $modeArray["payments"]["client_id"] = "";
-    $modeArray["payments"]["base_url"] = "";
+    $modeArray["payments"]["client_id"] = "<exampleAppclication>@payment-init-1.0";
+    $modeArray["payments"]["base_url"] = "<exampleOpenBankingApiUrl>/payment-init-1.0/open-banking/v3.1/pisp";
     $modeArray["payments"]["scope"] = "payments";
  
     //"Logout" link -- remove sessions
@@ -31,24 +31,24 @@
 
         //Set the "OpenBankingAuth" class parameters 
         $example = new OpenBankingAuth([
-            'client_assertion_type' => '',
+            'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
             'scope' => 'accounts',
-            'authorizationEndpoint' => '',
-            'tokenEndpoint' => '',
-            'redirect_uri' => '',
-            'grant_type' => '',
+            'authorizationEndpoint' => '<exampleOpenBankingApiUrl>/auth/realms/ftb-sandbox/protocol/openid-connect/auth',
+            'tokenEndpoint' => '<exampleOpenBankingApiUrl>/auth/realms/ftb-sandbox/protocol/openid-connect/token',
+            'redirect_uri' => 'http://localhost/',
+            'grant_type' => 'client_credentials',
             'client_id' => $modeArray[$_SESSION['example_function']]['client_id'],
-            'private_key' => '',
+            'private_key' => file_get_contents(".".DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'keys'.DIRECTORY_SEPARATOR.'rsa.pem'),
             'scope' => $modeArray[$_SESSION['example_function']]['scope'],
             'base_url' => $modeArray[$_SESSION['example_function']]['base_url'],
-            'oidc_base_url' => '',
+            'api_base_url' => '<exampleOpenBankingApiUrl>/auth/realms',
             'x-fapi-customer-ip-address' => '127.0.0.1:8080'
         ]);
         
         //Set the "Functions" class parameters (example class)
         $functions = new Functions([
             "base_url" => $modeArray[$_SESSION["example_function"]]["base_url"],
-            "oidc_base_url" => ""
+            "api_base_url" => "<exampleOpenBankingApiUrl>/auth/realms"
         ]);
 
         if (!isset($_GET["code"]) && (!isset($_SESSION["loggedIn"]) || !$_SESSION["loggedIn"])) {
@@ -56,7 +56,7 @@
             $accessToken = $example->getAccessToken();
             $_SESSION["accessToken"] = $accessToken;
 
-            //Get accountRequestId - create payload
+            //Get accountAccessConsentId - create payload
             if ($_SESSION["example_function"] == "accounts") {
                 $requestBody = new stdClass();
                 $requestBody->Data = new stdClass();
@@ -67,29 +67,30 @@
                 $_SESSION["kid"] = $functions->generateRandomString().$functions->generateRandomString();
                 $issuer = "C=UK, ST=England, L=London, O=Acme Ltd.";
                 $signatureHeader = $example->createSignatureHeader($requestBody, $_SESSION["kid"], $issuer);
-                $intentId = $functions->createAccountRequest($requestBody, $accessToken, ["Content-Type: application/json","x-jws-signature:".$signatureHeader]);
+                $intentId = $functions->createAccountAccessConsent($requestBody, $accessToken, ["Content-Type: application/json","x-jws-signature:".$signatureHeader]);
             } else {
                 $requestBody = new stdClass();
                 $requestBody->Data = new stdClass();
                 $requestBody->Data->Initiation = new stdClass();
-                $requestBody->Data->Initiation->InstructionIdentification = "mobilVallet123";
-                $requestBody->Data->Initiation->EndToEndIdentification = "29152852756654";
+                $requestBody->Data->Initiation->InstructionIdentification = "ACME412";
+                $requestBody->Data->Initiation->EndToEndIdentification = "FRESCO.21302.GFX.20";
                 $requestBody->Data->Initiation->InstructedAmount = new stdClass();
-                $requestBody->Data->Initiation->InstructedAmount->Amount = "1680.00";
+                $requestBody->Data->Initiation->InstructedAmount->Amount = "165.88";
                 $requestBody->Data->Initiation->InstructedAmount->Currency = "HUF";
-                $requestBody->Data->Initiation->CreditorAgent = new stdClass();
-                $requestBody->Data->Initiation->CreditorAgent->SchemeName = "BICFI";
-                $requestBody->Data->Initiation->CreditorAgent->Identification = "UBRTHUHB";
                 $requestBody->Data->Initiation->CreditorAccount = new stdClass();
                 $requestBody->Data->Initiation->CreditorAccount->SchemeName = "IBAN";
-                $requestBody->Data->Initiation->CreditorAccount->Identification = "HU35120103740010183300200004";
-                $requestBody->Data->Initiation->CreditorAccount->Name = "Deichmann Cipőkereskedelmi Korlátolt Felelősségű Társaság";
+                $requestBody->Data->Initiation->CreditorAccount->Identification = "HU14120103740010183300300001";
+                $requestBody->Data->Initiation->CreditorAccount->Name = "ACME Inc";
+                $requestBody->Data->Initiation->CreditorAccount->SecondaryIdentification = "0002";
+                $requestBody->Data->Initiation->RemittanceInformation = new stdClass();
+                $requestBody->Data->Initiation->RemittanceInformation->Reference = "FRESCO-101";
+                $requestBody->Data->Initiation->RemittanceInformation->Unstructured = "Internal ops code 5120101";
                 $requestBody->Risk = new stdClass();
 
                 $xIdempotencyKey = $functions->generateRandomString();
                 $issuer = "C=UK, ST=England, L=London, O=Acme Ltd.";
                 $signatureHeader = $example->createSignatureHeader($requestBody, $_SESSION["kid"], $issuer);
-                $intentId = $functions->createPaymentRequest($requestBody, $accessToken,["Content-Type: application/json","x-idempotency-key: ".$xIdempotencyKey]);
+                $intentId = $functions->createPaymentRequest($requestBody, $accessToken,["Content-Type: application/json","x-idempotency-key: ".$xIdempotencyKey, "x-jws-signature:".$signatureHeader]);
                 $_SESSION["example_payment_id"] = $intentId;
             }
             if ((!isset($_SESSION["loggedIn"]) || !$_SESSION["loggedIn"])) {
@@ -103,7 +104,7 @@
             if (!isset($_SESSION["user_access_token"]) || $_SESSION["user_access_token"] == "") {
                 $assertionPayload = [
                     "sub" => $example->config["client_id"],
-                    "aud" => $example->config["oidc_base_url"]."/ftb-sandbox/protocol/openid-connect/token",
+                    "aud" => $example->config["api_base_url"]."/ftb-sandbox/protocol/openid-connect/token",
                     "exp" => 1575504000,
                 ];
 

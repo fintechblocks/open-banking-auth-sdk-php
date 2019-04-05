@@ -12,9 +12,9 @@ This repository contains two subfolders:
 
 First read throught the Authorization part of API documentation.
 
-[Account-information API documentation](https://portal.sandbox.mkb.hu/api-documentation/account-info-1.0)
+[Account-information API documentation](<exampleOpenBankingApiUrl>/api-documentation/account-info-1.0)
 
-[Payment-initiation API documentation](https://portal.sandbox.mkb.hu/api-documentation/payment-init-1.0)
+[Payment-initiation API documentation](<exampleOpenBankingApiUrl>/api-documentation/payment-init-1.0)
 
 **Usage**
 
@@ -32,7 +32,7 @@ $example = new OpenBankingAuth([
             'private_key' => 'your private key',
             'scope' => 'check the documentation',
             'base_url' => 'the base url',
-            'oidc_base_url' => 'oidc base url',
+            'api_base_url' => 'api base url',
             'x-fapi-customer-ip-address' => 'your IP address'
         ]);
 ```
@@ -53,7 +53,7 @@ $accessTokenObj = $example->getAccessToken();
 
 *Required parameters*
 
-* $intentId (identification of previously created intent, e.g. AccountRequestId)
+* $intentId (identification of previously created intent, e.g. ConsentId)
 
 **Usage**
 
@@ -134,4 +134,4 @@ $newTokens = $example->refreshToken($refreshToken);
 
 ## How to run the example ##
 
-You only need an Apache and PHP enviroment. 
+You only need a Apache and php. 
