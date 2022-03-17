@@ -5,12 +5,13 @@
 This SDK provides tools for the integration of the Open Banking authorization flow into your PHP application.
 
 This repository contains two subfolders:
+
 * */OpenBankingAuth* contains the SDK source code 
 * */examples* contains an example on how to use the SDK
 
 ## How to use this SDK ##
 
-First read throught the Authorization part of API documentation.
+First read through the Authorization part of the API documentation.
 
 [Account-information API documentation](<exampleOpenBankingApiUrl>/api-documentation/account-info-1.0)
 
@@ -88,6 +89,7 @@ $accesAndRefreshToken = $example->tokenExcange($code);
 * $issuer
 
 **Usage**
+
 ```php
 $requestBody = new stdClass();
 $requestBody->Data = new stdClass();
@@ -134,4 +136,4 @@ $newTokens = $example->refreshToken($refreshToken);
 
 ## How to run the example ##
 
-You only need a Apache and php. 
+You only need a Web Server which is able to run PHP (e.g. Apache).

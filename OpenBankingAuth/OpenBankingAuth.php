@@ -1,6 +1,7 @@
 <?php
-    include_once("src".DIRECTORY_SEPARATOR."createJWT.php");
-    include_once("src".DIRECTORY_SEPARATOR."OpenBankingAuthConnect.php");
+    include_once(__DIR__ .DIRECTORY_SEPARATOR."src".DIRECTORY_SEPARATOR."createJWT.php");
+    include_once(__DIR__ .DIRECTORY_SEPARATOR."src".DIRECTORY_SEPARATOR."OpenBankingAuthConnect.php");
+
     /**
     * Example usage:
     * $example = new OpenBankingAuth([
@@ -8,12 +9,12 @@
     *        'param' => 'value',
     *    ]);
     *
-    * @author   Zoltan Baksa <zoltan.baksa@fintechblocks.com>
     * @version  1.0
     * @access   public
     */
     class OpenBankingAuth {
         public $config;
+
         public function __construct(array $config = []) {
             $this->config = array_merge([
                 "redirect_uri" => "",
@@ -34,6 +35,7 @@
                 "key_id" => ""
             ], $config);
         }
+
         /**
          * Create a JWT from the payload (the JWT's body) array 
          * @param array $payload
@@ -44,13 +46,14 @@
                 "sub" => $this->config["client_id"],
                 "aud" => $this->config["tokenEndpoint"],
                 "exp" => time()+60000,
+                "jti" => file_get_contents('/proc/sys/kernel/random/uuid')
             ];
             $JWT = new createJWT();
             return $JWT->getJWT($assertionPayload, $this->config["private_key"]);
         }
 
         /**
-         * Create a Access token
+         * Create an Access token
          * @return object - the full response from the server
          */
         public function getAccessToken(){
@@ -68,8 +71,9 @@
             $response = json_decode($connect->getResponse());
             return $response->access_token;
         }
+
         /**
-         * Generate the auth url 
+         * Generate the authorization url 
          * @param int $intentId 
          * @return string - url 
          */
@@ -160,6 +164,7 @@
             $response = json_decode($connect->getResponse());
             return $response;
         }
+        
         /**
          * Check if the token is expired
          * @param string $token - remember, if you want to check a JWT-s expiration, you need to set here the payload (explode the JWT by ".")

@@ -1,18 +1,20 @@
 <?php
-/* */
+
 class Functions {
     private $config;
+
     public function __construct(array $config) {
         $this->config = $config;
     }
+
     public function generateRandomString($length = 10) {
         return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/strlen($x)) )),1,$length);
     }
     
     /*************************************************************** ACCOUNT FUNCTIONS *****************************************************************/
-    public function createAccountAccessConsent($body, $access_token, $header){
+    public function createAccountAccessConsent($body, $accessToken, $header){
         $header = array_merge([
-            "Authorization: Bearer ".$access_token
+            "Authorization: Bearer ".$accessToken
         ], $header);
         $connect =  new Connect([
             "url" => $this->config["base_url"]."/account-access-consents",
@@ -132,9 +134,9 @@ class Functions {
     }
 
     /*************************************************************** PAYMENT FUNCTIONS *****************************************************************/
-    public function createPaymentRequest($body, $access_token, $header){
+    public function createDomesticPaymentConsentRequest($body, $accessToken, $header){
         $header = array_merge([
-            "Authorization: Bearer ".$access_token
+            "Authorization: Bearer ".$accessToken
         ], $header);
         $connect =  new Connect([
             "url" => $this->config["base_url"]."/domestic-payment-consents",
@@ -145,9 +147,9 @@ class Functions {
         return $response->Data->ConsentId;
     }
 
-    public function getPaymentById($userAccessToken, $paymentId){
+    public function getDomesticPaymentConsentByConsentId($userAccessToken, $consentId){
         $connect =  new Connect([
-            "url" => $this->config["base_url"]."/domestic-payment-consents/".$paymentId,
+            "url" => $this->config["base_url"]."/domestic-payment-consents/".$consentId,
             "header" => ["Authorization: Bearer ".$userAccessToken,"Content-Type: application/json","x-fapi-customer-ip-address: 127.0.0.1:8080"]
         ]);
         $response = json_decode($connect->getResponse());

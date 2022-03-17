@@ -1,6 +1,7 @@
 <?php
     class Connect {
         private $config;
+        
         public function __construct(array $config) {
             $this->config = array_merge([
                 "url" => "",
